@@ -35,6 +35,11 @@
     const container = document.querySelector('#container')
     const commands = [
       { name: 'raw_request' },
+      { name: 'simple_command' },
+      {
+          name: 'command_arguments_struct',
+          args: { person: { name: 'ferris', age: 6 } }
+        },
     ]
 
     for (const command of commands) {

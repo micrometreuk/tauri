@@ -1,21 +1,37 @@
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-use tauri::ipc::{Request, Response};
 
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
+use serde::Deserialize;
+use tauri::ipc::{Request, Response};
+mod commands;
+
+
+
 #[tauri::command]
 fn raw_request(request: Request<'_>) -> Response {
   println!("{request:?}");
   Response::new(include_bytes!("../.././README.md").to_vec())
 }
+#[derive(Deserialize)]
+struct Person<'a> {
+  name: &'a str,
+  age: u8,
+}
+
+#[tauri::command]
+fn command_arguments_struct(Person { name, age }: Person<'_>) {
+  println!("received person struct with name: {name} | age: {age}")
+}
+
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
-        .invoke_handler(tauri::generate_handler![greet])
-        .invoke_handler(tauri::generate_handler![raw_request])
+        .invoke_handler(tauri::generate_handler![
+          raw_request,
+          command_arguments_struct,
+          commands::simple_command,
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
