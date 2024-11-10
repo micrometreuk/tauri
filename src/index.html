@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome to Tauri!</title>
+</head>
+
+<body>
+
+
+  <p id="message"></p>
+
+  <div>Without Args: <span id="response-optional"></span></div>
+  <div id="container"></div>
+  <script>
+    function runCommand(commandName, args, optional) {
+      const id = optional ? '#response-optional' : '#response'
+      const result = document.querySelector(id)
+      window.__TAURI__.core
+        .invoke(commandName, args)
+        .then((response) => {
+          const val =
+            response instanceof ArrayBuffer
+              ? new TextDecoder().decode(response)
+              : response
+          result.innerText = `Ok(${val})`
+        })
+        .catch((error) => {
+          result.innerText = `Err(${error})`
+        })
+    }
+
+    const container = document.querySelector('#container')
+    const commands = [
+      { name: 'raw_request' },
+    ]
+
+    for (const command of commands) {
+      const { name } = command
+      const args = command.args ?? {
+        [name.endsWith('snake') ? 'the_argument' : 'theArgument']: 'value'
+      }
+      const button = document.createElement('button')
+      button.innerHTML = `Run ${name}`
+      button.addEventListener('click', function () {
+        runCommand(name, args, false)
+        runCommand(name, Object.create(null), true)
+      })
+      container.appendChild(button)
+    }
+  </script>
+</body>
+
+</html>
