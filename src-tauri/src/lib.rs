@@ -1,7 +1,7 @@
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 
 use serde::Deserialize;
-use tauri::ipc::{Request, Response};
+use tauri::{ipc::{Request, Response}, Window};
 mod commands;
 
 
@@ -21,7 +21,10 @@ struct Person<'a> {
 fn command_arguments_struct(Person { name, age }: Person<'_>) {
   println!("received person struct with name: {name} | age: {age}")
 }
-
+#[tauri::command]
+fn window_label(window: Window) {
+  println!("window label: {}", window.label());
+}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -31,6 +34,8 @@ pub fn run() {
           raw_request,
           command_arguments_struct,
           commands::simple_command,
+          window_label,
+
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
